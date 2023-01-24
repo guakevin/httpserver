@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -34,5 +35,10 @@ func (a *APIServer) configurateRouter() {
 func (a *APIServer) handleCheckHealth() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
+		w.Write([]byte("{\"status\": \"OK\"}"))
 	}
+}
+
+func (a *APIServer) Start() error {
+	return http.ListenAndServe(fmt.Sprintf("%s:%d", a.config.Host, a.config.Port), a.router)
 }
