@@ -1,14 +1,18 @@
 
-FROM golang:1.18-alpine
+FROM golang:1.18-alpine AS build
 
 WORKDIR /app
 
-ADD . /app
+COPY [ "go.mod", "go.sum", "./" ]
+RUN go mod download 
+
+ADD . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s' -a -installsuffix cgo -o server cmd/api/main.go
+RUN go build -o dist/server main.go
 
-EXPOSE 8000
-
-CMD ["./server"]
+FROM alpine:3.16
+WORKDIR /app
+COPY --from=build /app/dist/server /app/
+CMD [ "/app/server", "-p", "8000" ]
